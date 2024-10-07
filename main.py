@@ -23,23 +23,28 @@ game_actief = True
 
 correction_angle = 0
 
-enemyGenTimeSleep = 1.5
+enemies = []
 
-enemysListX = []
-enemysListY = []
+# Brainstorm:
+#   - een difficulty slider en die past dan de waarde vna de zombie gen aan met de modulo zodat er meer zombies komen per difficulty
+#   - Een score meter die met een multiplier
+#   - Eigen map met een beetje animatie
+#   - Eigen soundtrack (8 of 16-bit)
 
 def shoot():
     print("Shooting")
 
 def enemieGen():
-    enemyPosX = random.randint(0, 1280)
-    enemyPosY = random.randint(0, 720)
-    print(f"Generating an enemy on {enemyPosX}, {enemyPosY}")
-    enemysListX.append(enemyPosX)
-    enemysListY.append(enemyPosY)
-    for e in enemysListX:
-      enemy_rect = enemy.get_rect(center = (enemysListX[e], enemysListY[e]))
-      screen.blit(enemy, enemy_rect)
+
+    if pygame.time.get_ticks() % 20 == 0 and len(enemies) < 10:
+        enemyPosX = random.randint(0, 1280)
+        enemyPosY = random.randint(0, 720)
+
+        print(f"Generating an enemy on {enemyPosX}, {enemyPosY}")
+
+        enemy_rect = enemy.get_rect(center=(enemyPosX, enemyPosY))
+        enemies.append(enemy_rect)  # Voeg de nieuwe vijand toe aan de lijst
+
 
 
 while True:
@@ -88,6 +93,11 @@ while True:
     # Debug knop(pen)
     if keys[pygame.K_q]:
         enemieGen()
+    if keys[pygame.K_t] and len(enemies) > 0:
+        enemies.pop(0)
+
+    for enemy_rect in enemies:
+        screen.blit(enemy, enemy_rect)
 
     pygame.display.update()
     clock.tick(60)
