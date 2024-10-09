@@ -1,9 +1,9 @@
-import pygame, sys, math, random
+import pygame, sys, math, random, logging
 from pygame.locals import *
 
-
-#pygame initializing
+#initializing
 pygame.init()
+logging.basicConfig(level=logging.DEBUG, format="%(asctime)s -  %(levelname)s - %(message)s")
 
 # Krijg informatie over de monitor zodat je automatisch fullscreen wordt gezet
 infoObject = pygame.display.Info()
@@ -18,8 +18,8 @@ clock = pygame.time.Clock()
 class Background(object):
     def __init__(self):
         self.background_ogImg = pygame.image.load("graphics/backgroundIMG.png").convert()
-
         self.background_image = pygame.transform.scale(self.background_ogImg, (infoObject.current_w, infoObject.current_h))
+        logging.info("Initialized background class!")
 
     def draw(self):
         screen.blit(self.background_image, (0,0))
@@ -32,6 +32,7 @@ class Bullet(object):
         self.y = y
         self.angle = angle
         self.velocity = velocity
+        logging.info("Initialized bullet class!")
 
     def debugShooting(self):
         if pygame.mouse.get_pressed()[0]:
@@ -48,11 +49,13 @@ class Player(object):
         self.speed = speed
         self.health = health
         self.correction_angle = 0
+        self.rot_image_rect = None
 
         #image magic because scaling n shi
         self.oldImage = pygame.image.load("graphics/playerIMg.png")
         self.scaledImage =  pygame.transform.scale(self.oldImage, (62.6, 41.4))
         self.rectImage = self.scaledImage.get_rect(center=(self.x, self.y))
+        logging.info("Initialized player class!")
 
     #functie om movement mogelijk te maken
     def movement(self):
@@ -99,6 +102,8 @@ class Enemy(object):
         self.oldImage = pygame.image.load("graphics/enemyIMG.png").convert_alpha()
         self.scaledImage = pygame.transform.scale(self.oldImage, (62.6, 41.4))
         self.enemyList = []
+        self.rectImage = None
+        logging.info("Initalized enemy class!")
 
     def GenerateEnemy(self):
         # een modules operation voor om de spawnrate te bepalen en voor semi "random" spawntijden
@@ -109,7 +114,7 @@ class Enemy(object):
             self.posY = random.randint(0, 720)
 
             # debug
-            print(f"Generating an enemy on {self.posX}, {self.posY}")
+            logging.debug(f"Generating an enemy on {self.posX}, {self.posY}")
 
             # als die een enemy kan spawnen dan ook de rect aanmaken en toevoegen aan een lijst zodat de enemy op het scherm blijft
             self.rectImage = self.scaledImage.get_rect(center=(self.posX, self.posY))
@@ -120,11 +125,31 @@ class Enemy(object):
         for self.rectImage in self.enemyList:
             screen.blit(self.scaledImage, self.rectImage)
 
-# classes callen
+    def move_towards_player(self):
+        for self.rectImage in self.enemyList:    
+            #Vind de richtings vector tussen de zombies en de speler
+            dx, dy = player.rot_image_rect.x - self.rectImage.x, player.rot_image_rect.y - self.rectImage.y
+            dist = math.hypot(dx, dy)
+            if dist != 0:
+                dx, dy = dx / dist, dy / dist # Maak het beter
+            else:
+                continue
+            # Ga naar de speler toe met een bepaalde snelheid
+            self.rectImage.x += dx * self.speed
+            self.rectImage.y += dy * self.speed
+
+    def check_if_shot(self):
+        for self.rectImage in self.enemyList:
+            if self.rectImage.colliderect(player.rot_image_rect):
+                logging.debug(f"The list of enemies: {self.enemyList}")
+
+
+# classes callen en gelijk zetten aan een variable
 background = Background()
 bullet = Bullet(0,0,0,0)
 player = Player(7.5, 100)
-enemy = Enemy(100, 20, 10)
+enemy = Enemy(100, 20, 6)
+logging.info("Classes gecalled en geregeld!")
 
 
 running = True
@@ -140,8 +165,16 @@ while running:
 
     enemy.GenerateEnemy()
     enemy.draw()
+    enemy.move_towards_player()
+    enemy.check_if_shot()
 
     bullet.debugShooting()
+
+    # Debug dingen
+    keys = pygame.key.get_pressed()
+    if keys[pygame.K_q] and len(enemy.enemyList) > 0:
+        enemy.enemyList.pop(0)
+        logging.debug(f"EnemyList after popping [0]: {enemy.enemyList}")
 
     pygame.display.flip()
     clock.tick(60)
