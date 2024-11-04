@@ -21,7 +21,7 @@ clock = pygame.time.Clock()
 
 # classes callen en gelijk zetten aan een variable
 background = Background()
-bullet = Bullet(0)
+bullet = Bullet(5)
 player = Player(7.5, 100)
 enemy = Enemy(100, 20, 6)
 logging.info("Classes gecalled en geregeld!")
@@ -43,7 +43,9 @@ while running:
     enemy.move_towards_player()
     enemy.look_at_player()
 
-    bullet.debugShooting()
+    bullet.update()
+    bullet.draw()
+    bullet.shooting(player)
 
     # Debug dingen
     keys = pygame.key.get_pressed()
