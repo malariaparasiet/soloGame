@@ -39,13 +39,14 @@ while running:
     player.movement()
 
     enemy.GenerateEnemy()
-    enemy.check_if_shot()
-    enemy.move_towards_player()
-    enemy.look_at_player()
+    enemy.check_if_shot(player)
+    enemy.move_towards_player(player)
+    enemy.look_at_player(player)
 
     bullet.update()
     bullet.draw()
     bullet.shooting(player)
+    bullet.check_if_shot_enemy(enemy)
 
     # Debug dingen
     keys = pygame.key.get_pressed()
