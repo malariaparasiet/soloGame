@@ -25,7 +25,7 @@ class Enemy(object):
 
     def GenerateEnemy(self):
         # een modules operation voor om de spawnrate te bepalen en voor semi "random" spawntijden
-        if pygame.time.get_ticks() % self.spawnrate == 0 and len(self.enemyList) < 10:
+        if random.randint(1,5) == random.randint(1,5) and len(self.enemyList) < 10:
             
             # random positie krijgen om een enemy te spawnen
             self.posX = random.randint(0, 1280)
