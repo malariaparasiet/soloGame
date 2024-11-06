@@ -66,3 +66,8 @@ class Player(object):
         self.rot_image_rect = rot_image.get_rect(center=self.rectImage.center)
 
         screen.blit(rot_image, self.rot_image_rect.topleft)
+
+    def updateVariables(self):
+        from main import bullet
+
+        self.score = bullet.score

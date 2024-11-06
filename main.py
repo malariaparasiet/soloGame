@@ -37,6 +37,7 @@ while running:
     player.checkIfInsideBoundry()
     player.playerLooksAtMouse()
     player.movement()
+    player.updateVariables()
 
     enemy.GenerateEnemy()
     enemy.check_if_shot(player)
@@ -46,7 +47,17 @@ while running:
     bullet.update()
     bullet.draw()
     bullet.shooting(player)
-    bullet.check_if_shot_enemy(enemy)
+    bullet.check_if_shot_enemy(enemy) 
+
+    pygame.font.init()
+
+    font = pygame.font.Font("graphics\AurulentSansMNerdFontPropo-Regular.otf", 30)
+
+    clipSizeText_surface = font.render(f'Bullets {bullet.clip_size}/30', False, (255,255,255))
+    screen.blit(clipSizeText_surface, (infoObject.current_w - 250, infoObject.current_h - 250))
+
+    scoreText_surface = font.render(f'Score: {player.score}', False, (255,255,255))
+    screen.blit(scoreText_surface, (infoObject.current_w - 400, infoObject.current_h - 400))
 
     # Debug dingen
     keys = pygame.key.get_pressed()

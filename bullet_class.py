@@ -19,7 +19,12 @@ class Bullet(object):
         self.scaledImage = pygame.transform.scale(self.bulletIMG, (45, 45))
         self.bulletList = []
         self.clip_size = 30
-        logging.info("Initialized bullet class!")
+        self.reload = False
+        self.shoot = True
+        self.lastReloadTime = 0
+        self.lastShootTime = 0
+        self.score = 0
+        logging.info("Initialized bullet class!") 
 
     def update(self):
         # Update the position of each bullet based on its angle
@@ -35,23 +40,36 @@ class Bullet(object):
 
     def shooting(self, player):
         keys = pygame.key.get_pressed()
-        reload = False
-        if pygame.mouse.get_pressed()[0] and pygame.time.get_ticks() % 4 == 0 and self.clip_size > 0:
+
+        if pygame.mouse.get_pressed()[0] and self.clip_size > 0 and self.shoot == True:
+
+            self.lastShootTime = pygame.time.get_ticks()
+            self.shoot = False
+
             self.clip_size -= 1
+            
             angle_rad = math.radians(player.angle)  # Ensure we're using radians
+            
             x = player.rot_image_rect.centerx + 26 * math.cos(angle_rad)
+            
             y = player.rot_image_rect.centery - 9 * math.sin(angle_rad)
 
             # Add the new bullet to the list with rect
             bullet_rect = self.scaledImage.get_rect(center=(x, y))
             self.bulletList.append({'x': x, 'y': y, 'angle': angle_rad, 'rect': bullet_rect})
             logging.info(f"Bullet fired at: x: {x}, y: {y}")
-        elif keys[pygame.K_r]:
-            lastReloadTime = pygame.time.get_ticks()
-            reload = True
+        
+        if self.shoot == False and pygame.time.get_ticks() - self.lastShootTime > 300:
+            self.shoot = True
+
+        if keys[pygame.K_r] and self.reload == False:
+            self.lastReloadTime = pygame.time.get_ticks()
+            self.reload = True
             self.clip_size = 30
-        if reload and pygame.time.get_ticks() - lastReloadTime > 1000:
-            reload = False
+        
+        if self.reload and pygame.time.get_ticks() - self.lastReloadTime > 1000:
+            self.reload = False
+
 
     def draw(self):
         for bullet in self.bulletList:
@@ -64,4 +82,5 @@ class Bullet(object):
                 if bullet['rect'].colliderect(enemy_data['rect']):
                     self.bulletList.remove(bullet)  # Remove the bullet if it hits an enemy
                     enemy.enemyList.remove(enemy_data)  # Remove the enemy if it’s hit
+                    self.score += 100
                     break  # Exit inner loop once the bullet has been removed
