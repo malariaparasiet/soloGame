@@ -1,103 +1,101 @@
-import pygame, sys, math, random
-from pygame.locals import QUIT
+import pygame, sys, logging
+from pygame.locals import *
 
+from enemy_class import Enemy
+from player_class import Player
+from bullet_class import Bullet
+from background_class import Background
+from menus import Menus
+
+
+#initializing
 pygame.init()
-screen = pygame.display.set_mode((1280, 720))
-pygame.display.set_caption('SoloGame')
-font = pygame.font.Font(None, 50)
+logging.basicConfig(level=logging.DEBUG, format="%(asctime)s -  %(levelname)s - %(message)s")
+
+# Krijg informatie over de monitor zodat je automatisch fullscreen wordt gezet
+infoObject = pygame.display.Info()
+
+screen = pygame.display.set_mode((infoObject.current_w, infoObject.current_h), HWSURFACE | DOUBLEBUF )
+pygame.display.set_icon(pygame.image.load("graphics/playerIMG.png"))
+pygame.display.set_caption("SoloGame Koen Veldkamp H5")
 clock = pygame.time.Clock()
 
-background_surface = pygame.image.load("graphics/backgroundIMG.png").convert()
-background_image = pygame.transform.scale(background_surface, (1280, 720))
+# classes callen en gelijk zetten aan een variable
+background = Background()
+bullet = Bullet(5)
+player = Player(7.5, 100)
+enemy = Enemy(100, 20, 6)
+menus = Menus(screen)
+logging.info("Classes gecalled en geregeld!")
 
-player_ogSurface = pygame.image.load("graphics/playerIMG.png").convert_alpha()
-player = pygame.transform.scale(player_ogSurface, (62.6, 41.4))
-player_pos = screen.get_rect().center
-player_rect = player.get_rect(center=player_pos)
-
-enemy_ogSurface = pygame.image.load("graphics/enemyIMG.png").convert_alpha()
-enemy = pygame.transform.scale(enemy_ogSurface, (62.6, 41.4))
-
-zwaartekracht = 0
-game_actief = True
-
-correction_angle = 0
-
-enemies = []
-
-# Brainstorm:
-#   - een difficulty slider en die past dan de waarde vna de zombie gen aan met de modulo zodat er meer zombies komen per difficulty
-#   - Een score meter die met een multiplier
-#   - Eigen map met een beetje animatie
-#   - Eigen soundtrack (8 of 16-bit)
-
-def shoot():
-    print("Shooting")
-
-def enemieGen():
-
-    if pygame.time.get_ticks() % 20 == 0 and len(enemies) < 10:
-        enemyPosX = random.randint(0, 1280)
-        enemyPosY = random.randint(0, 720)
-
-        print(f"Generating an enemy on {enemyPosX}, {enemyPosY}")
-
-        enemy_rect = enemy.get_rect(center=(enemyPosX, enemyPosY))
-        enemies.append(enemy_rect)  # Voeg de nieuwe vijand toe aan de lijst
-
-
-
-while True:
-    # Event handling
+while menus.gameRunning:
+    background.draw()
     for event in pygame.event.get():
-        if event.type == QUIT:
-            pygame.quit()
+        if event.type == pygame.QUIT:
             sys.exit()
 
-    # Movement van de speler
+    player.checkIfInsideBoundry()
+    player.playerLooksAtMouse()
+    player.movement()
+    player.updateVariables()
+    player.isBeingTouchedByEnemy()
+
+    enemy.GenerateEnemy()
+    enemy.check_if_shot(player)
+    enemy.move_towards_player(player)
+    enemy.look_at_player(player)
+
+    bullet.update()
+    bullet.draw()
+    bullet.shooting(player)
+    bullet.check_if_shot_enemy(enemy) 
+
+    menus.gameRunningCheck()
+    menus.mainMenuCheck()
+    menus.killedMenuCheck()
+
+    pygame.font.init()
+
+    font = pygame.font.Font("graphics\AurulentSansMNerdFontPropo-Regular.otf", 30)
+    font_health = pygame.font.Font("graphics\AurulentSansMNerdFontPropo-Regular.otf", 15)
+
+
+    clipSizeText_surface = font.render(f'Bullets {bullet.clip_size}/30', False, (255,255,255))
+    screen.blit(clipSizeText_surface, (infoObject.current_w - 250, infoObject.current_h - 250))
+
+    scoreText_surface = font.render(f'Score: {player.score}', False, (255,255,255))
+    screen.blit(scoreText_surface, (infoObject.current_w - 250, infoObject.current_h - 300))
+
+    healthText_surface = font_health.render(f'Health: {player.health}', False, (255,255,255))
+    screen.blit(healthText_surface, (player.rot_image_rect.x, player.rot_image_rect.y + 40))
+
+    # Debug dingen
     keys = pygame.key.get_pressed()
-    if keys[pygame.K_d]:
-        player_rect.centerx += 5
-    if keys[pygame.K_a]:
-        player_rect.centerx -= 5
-    if keys[pygame.K_w]:
-        player_rect.centery -= 5
-    if keys[pygame.K_s]:
-        player_rect.centery += 5
-    
-    # Schiet mechanisme met muis
-    if pygame.mouse.get_pressed()[0]:
-        shoot()
+    if keys[pygame.K_q] and len(enemy.enemyList) > 0:
+        enemy.enemyList.pop(0)
+        logging.debug(f"EnemyList after popping [0]: {enemy.enemyList}")
+    if keys[pygame.K_u] and player.health > 0:
+        player.health -=25
 
-    if player_rect.right >= 1280:
-        player_rect.right = 1280
-    if player_rect.left <= 0:
-        player_rect.left = 0
-    if player_rect.bottom >= 720:
-        player_rect.bottom = 720
-    if player_rect.top <= 0:
-        player_rect.top = 0
 
-    # Zodat de speler altijd naar de muis kijkt
-    mx, my = pygame.mouse.get_pos()
-    dx, dy = mx - player_rect.centerx, my - player_rect.centery
-    angle = math.degrees(math.atan2(-dy, dx)) - correction_angle
+    pygame.display.flip()
+    clock.tick(60)
 
-    # draaien
-    rot_image = pygame.transform.rotate(player, angle)
-    rot_image_rect = rot_image.get_rect(center=player_rect.center)
+while menus.mainMenuActive:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            sys.exit()
+    menus.mainMenu()
+    logging.debug("Hier komt een main menu!")
 
-    screen.blit(background_image, (0, 0))
-    screen.blit(rot_image, rot_image_rect.topleft)
+    pygame.display.flip()
+    clock.tick(60)
 
-    # Debug knop(pen)
-    if keys[pygame.K_q]:
-        enemieGen()
-    if keys[pygame.K_t] and len(enemies) > 0:
-        enemies.pop(0)
+while menus.killedMenuActive:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            sys.exit()
+    logging.debug("Hier komt een killed menu!")
 
-    for enemy_rect in enemies:
-        screen.blit(enemy, enemy_rect)
-
-    pygame.display.update()
+    pygame.display.flip()
     clock.tick(60)
