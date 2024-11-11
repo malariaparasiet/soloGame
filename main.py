@@ -5,6 +5,7 @@ from enemy_class import Enemy
 from player_class import Player
 from bullet_class import Bullet
 from background_class import Background
+from menus import Menus
 
 
 #initializing
@@ -24,34 +25,82 @@ background = Background()
 bullet = Bullet(5)
 player = Player(7.5, 100)
 enemy = Enemy(100, 20, 6)
+menus = Menus(screen)
 logging.info("Classes gecalled en geregeld!")
 
-
-running = True
-while running:
-    background.draw()
+while True:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             sys.exit()
+    if menus.gameRunning:
+        background.draw()
 
-    player.checkIfInsideBoundry()
-    player.playerLooksAtMouse()
-    player.movement()
 
-    enemy.GenerateEnemy()
-    enemy.check_if_shot()
-    enemy.move_towards_player()
-    enemy.look_at_player()
+        player.checkIfInsideBoundry()
+        player.playerLooksAtMouse()
+        player.movement()
+        player.updateVariables()
+        player.isBeingTouchedByEnemy()
 
-    bullet.update()
-    bullet.draw()
-    bullet.shooting(player)
+        enemy.GenerateEnemy()
+        enemy.check_if_shot(player)
+        enemy.move_towards_player(player)
+        enemy.look_at_player(player)
 
-    # Debug dingen
-    keys = pygame.key.get_pressed()
-    if keys[pygame.K_q] and len(enemy.enemyList) > 0:
-        enemy.enemyList.pop(0)
-        logging.debug(f"EnemyList after popping [0]: {enemy.enemyList}")
+        bullet.update()
+        bullet.draw()
+        bullet.shooting(player)
+        bullet.check_if_shot_enemy(enemy) 
+
+        menus.killedMenuCheck()
+
+        pygame.font.init()
+
+        font = pygame.font.Font("graphics\AurulentSansMNerdFontPropo-Regular.otf", 30)
+        font_health = pygame.font.Font("graphics\AurulentSansMNerdFontPropo-Regular.otf", 15)
+
+
+        clipSizeText_surface = font.render(f'Bullets {bullet.clip_size}/30', False, (255,255,255))
+        screen.blit(clipSizeText_surface, (infoObject.current_w - 250, infoObject.current_h - 250))
+
+        scoreText_surface = font.render(f'Score: {player.score}', False, (255,255,255))
+        screen.blit(scoreText_surface, (infoObject.current_w - 250, infoObject.current_h - 300))
+
+        healthText_surface = font_health.render(f'Health: {player.health}', False, (255,255,255))
+        screen.blit(healthText_surface, (player.rot_image_rect.x, player.rot_image_rect.y + 40))
+
+        # Debug dingen
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_q] and len(enemy.enemyList) > 0:
+            enemy.enemyList.pop(0)
+            logging.debug(f"EnemyList after popping [0]: {enemy.enemyList}")
+        if keys[pygame.K_u] and player.health > 0:
+            player.health -=25
+
+
+        pygame.display.flip()
+        clock.tick(60)
+    
+    elif menus.mainMenuActive:
+        menus.mainMenu()
+
+    elif menus.killedMenuActive:
+        menus.killedMenu()
+
+# while menus.mainMenuActive:
+#     for event in pygame.event.get():
+#         if event.type == pygame.QUIT:
+#             sys.exit()
+#     menus.mainMenu()
+
+#     pygame.display.flip()
+#     clock.tick(60)
+
+# while menus.killedMenuActive:
+#     for event in pygame.event.get():
+#         if event.type == pygame.QUIT:
+#             sys.exit()
+#     logging.debug("Hier komt een killed menu!")
 
     pygame.display.flip()
     clock.tick(60)

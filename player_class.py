@@ -25,6 +25,9 @@ class Player(object):
         self.correction_angle = 0
         self.rot_image_rect = None
         self.angle = None
+        self.isKilled = False
+        self.canTakeHit = True
+        self.lastShootTime = 0
 
         #image magic because scaling n shi
         self.oldImage = pygame.image.load("graphics/playerIMg.png")
@@ -66,3 +69,22 @@ class Player(object):
         self.rot_image_rect = rot_image.get_rect(center=self.rectImage.center)
 
         screen.blit(rot_image, self.rot_image_rect.topleft)
+
+    def updateVariables(self):
+        from main import bullet
+
+        self.score = bullet.score
+
+    def isBeingTouchedByEnemy(self):
+        from main import enemy
+        for enemy in enemy.enemyList:
+            if enemy['rect'].colliderect(self.rot_image_rect) and self.health > 0 and self.canTakeHit:
+                self.lastShootTime = pygame.time.get_ticks()
+                self.canTakeHit = False
+                self.health -= 5
+            
+            if self.canTakeHit == False and pygame.time.get_ticks() - self.lastShootTime > 1750:
+                self.canTakeHit = True
+
+            if self.health <= 0:
+                self.isKilled = True
