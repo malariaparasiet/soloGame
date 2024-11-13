@@ -77,7 +77,6 @@ while True:
         if keys[pygame.K_u] and player.health > 0:
             player.health -=25
 
-
         pygame.display.flip()
         clock.tick(60)
     
@@ -86,21 +85,6 @@ while True:
 
     elif menus.killedMenuActive:
         menus.killedMenu()
-
-# while menus.mainMenuActive:
-#     for event in pygame.event.get():
-#         if event.type == pygame.QUIT:
-#             sys.exit()
-#     menus.mainMenu()
-
-#     pygame.display.flip()
-#     clock.tick(60)
-
-# while menus.killedMenuActive:
-#     for event in pygame.event.get():
-#         if event.type == pygame.QUIT:
-#             sys.exit()
-#     logging.debug("Hier komt een killed menu!")
 
     pygame.display.flip()
     clock.tick(60)
