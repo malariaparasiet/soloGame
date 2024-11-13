@@ -23,12 +23,12 @@ class Enemy(object):
 
     def GenerateEnemy(self):
         # Randomly spawn an enemy based on spawn rate and list size
-        if random.randint(1,5) == random.randint(1,5) and len(self.enemyList) < 10:
+        if random.randint(1,5) == random.randint(1,5) and len(self.enemyList) <= 35:
             posX = random.randint(0, infoObject.current_w)
             posY = random.randint(0, infoObject.current_h)
 
             # Debugging spawn position
-            logging.debug(f"Generating an enemy at position ({posX}, {posY})")
+            # logging.debug(f"Generating an enemy at position ({posX}, {posY})")
 
             # Create a new enemy dictionary with position and rect
             rectImage = self.scaledImage.get_rect(center=(posX, posY))
@@ -48,10 +48,10 @@ class Enemy(object):
             rect.x += dx * self.speed
             rect.y += dy * self.speed
 
-    def check_if_shot(self, player):
-        for enemy in self.enemyList:
-            if enemy['rect'].colliderect(player.rot_image_rect):
-                logging.debug(f"Collision detected between player and enemy at {enemy['rect'].topleft}")
+    # def check_if_shot(self, player):
+    #     for enemy in self.enemyList:
+    #         if enemy['rect'].colliderect(player.rot_image_rect):
+    #             logging.debug(f"Collision detected between player and enemy at {enemy['rect'].topleft}")
 
     def look_at_player(self, player):
         for enemy in self.enemyList:

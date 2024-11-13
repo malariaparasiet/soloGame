@@ -57,7 +57,7 @@ class Bullet(object):
             # Add the new bullet to the list with rect
             bullet_rect = self.scaledImage.get_rect(center=(x, y))
             self.bulletList.append({'x': x, 'y': y, 'angle': angle_rad, 'rect': bullet_rect})
-            logging.info(f"Bullet fired at: x: {x}, y: {y}")
+            # logging.info(f"Bullet fired at: x: {x}, y: {y}")
         
         if self.shoot == False and pygame.time.get_ticks() - self.lastShootTime > 300:
             self.shoot = True

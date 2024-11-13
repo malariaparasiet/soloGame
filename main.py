@@ -7,8 +7,16 @@ from bullet_class import Bullet
 from background_class import Background
 from menus import Menus
 
+#TODO
+#1. Sound effects
+#2. Maak tekst mooier
+#3. Voeg animatie toe
+#4. Speed up spelletje
+#5. Voeg comments toe en maak de code beter als het kan
 
 #initializing
+pygame.mixer.pre_init(44100, 16, 2, 4096)
+pygame.font.init()
 pygame.init()
 logging.basicConfig(level=logging.DEBUG, format="%(asctime)s -  %(levelname)s - %(message)s")
 
@@ -39,11 +47,10 @@ while True:
         player.checkIfInsideBoundry()
         player.playerLooksAtMouse()
         player.movement()
-        player.updateVariables()
         player.isBeingTouchedByEnemy()
 
         enemy.GenerateEnemy()
-        enemy.check_if_shot(player)
+        # enemy.check_if_shot(player)
         enemy.move_towards_player(player)
         enemy.look_at_player(player)
 
@@ -52,10 +59,6 @@ while True:
         bullet.shooting(player)
         bullet.check_if_shot_enemy(enemy) 
 
-        menus.killedMenuCheck()
-
-        pygame.font.init()
-
         font = pygame.font.Font("graphics\AurulentSansMNerdFontPropo-Regular.otf", 30)
         font_health = pygame.font.Font("graphics\AurulentSansMNerdFontPropo-Regular.otf", 15)
 
@@ -63,7 +66,7 @@ while True:
         clipSizeText_surface = font.render(f'Bullets {bullet.clip_size}/30', False, (255,255,255))
         screen.blit(clipSizeText_surface, (infoObject.current_w - 250, infoObject.current_h - 250))
 
-        scoreText_surface = font.render(f'Score: {player.score}', False, (255,255,255))
+        scoreText_surface = font.render(f'Score: {bullet.score}', False, (255,255,255))
         screen.blit(scoreText_surface, (infoObject.current_w - 250, infoObject.current_h - 300))
 
         healthText_surface = font_health.render(f'Health: {player.health}', False, (255,255,255))
@@ -83,7 +86,8 @@ while True:
     elif menus.mainMenuActive:
         menus.mainMenu()
 
-    elif menus.killedMenuActive:
+    if menus.killedMenuActive and player.health <= 0:
+        menus.gameRunning = False
         menus.killedMenu()
 
     pygame.display.flip()

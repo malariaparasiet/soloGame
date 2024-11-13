@@ -70,11 +70,6 @@ class Player(object):
 
         screen.blit(rot_image, self.rot_image_rect.topleft)
 
-    def updateVariables(self):
-        from main import bullet
-
-        self.score = bullet.score
-
     def isBeingTouchedByEnemy(self):
         from main import enemy
         for enemy in enemy.enemyList:
