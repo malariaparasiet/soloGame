@@ -24,8 +24,8 @@ class Enemy(object):
     def GenerateEnemy(self):
         # Randomly spawn an enemy based on spawn rate and list size
         if random.randint(1,5) == random.randint(1,5) and len(self.enemyList) < 10:
-            posX = random.randint(0, 1280)
-            posY = random.randint(0, 720)
+            posX = random.randint(0, infoObject.current_w)
+            posY = random.randint(0, infoObject.current_h)
 
             # Debugging spawn position
             logging.debug(f"Generating an enemy at position ({posX}, {posY})")
