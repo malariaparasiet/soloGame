@@ -80,6 +80,7 @@ class Player(object):
 
     def is_being_touched_by_enemy(self, enemy):
         """Check if player is being touched by an enemy and update health."""
+
         for enemy in enemy.enemyList:
             if enemy['rect'].colliderect(self.rot_image_rect) and self.health > 0 and self.canTakeHit:
                 self.lastHitTime = pygame.time.get_ticks()

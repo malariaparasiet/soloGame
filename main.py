@@ -40,7 +40,9 @@ background = Background()
 bullet = Bullet(5)  # Snelheid van de kogel
 player = Player(7.5, 100)  # Snelheid en gezondheid van de speler
 enemy = Enemy(100, 20, 6)  # Gezondheid, spawnrate, snelheid van de vijanden
+
 menus = Menus(screen, player, bullet, enemy)
+
 logging.info("Classes zijn geïnitialiseerd en gereed!")
 
 # Hoofdgame-loop

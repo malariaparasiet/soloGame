@@ -104,6 +104,7 @@ class Menus(object):
             self.bgTxtClr2 = (0, 0, 0)
 
     def killedMenu(self, bullet):
+
         """Weergeef het 'killed' menu en reageer op de muisinteractie voor herstart."""
         killedMenuBG_ogImg = pygame.image.load("graphics/killedMenuBG.png").convert()
         killedMenuBG_image = pygame.transform.scale(killedMenuBG_ogImg, (infoObject.current_w, infoObject.current_h))
@@ -122,7 +123,6 @@ class Menus(object):
         killedMenu_Text4 = font.render("Quit gaming!", False, (255, 255, 255), self.kilQtBgClr)
         killedMenu_Text4Rect = killedMenu_Text4.get_rect(center=(infoObject.current_w / 2, infoObject.current_h / 2 + 100))
         self.screen.blit(killedMenu_Text4, killedMenu_Text4Rect)
-
         highScore_Text3 = font.render(f'A NEW HIGHSCORE!!! YOUR HIGHSCORE: {bullet.score}', False, (255,255,255))
         highScore_Text3Rect =  highScore_Text3.get_rect(center=(infoObject.current_w / 2, infoObject.current_h / 2 - 50))
 
