@@ -40,7 +40,9 @@ background = Background()
 bullet = Bullet(5)  # Snelheid van de kogel
 player = Player(7.5, 100)  # Snelheid en gezondheid van de speler
 enemy = Enemy(100, 20, 6)  # Gezondheid, spawnrate, snelheid van de vijanden
-menus = Menus(screen)
+
+menus = Menus(screen, player, bullet, enemy)
+
 logging.info("Classes zijn geïnitialiseerd en gereed!")
 
 # Hoofdgame-loop
@@ -55,15 +57,14 @@ while True:
         menus.mainMenu()
 
     # Game-logica als het spel draait
-    elif menus.gameRunning:
-        menus.killedMenuActive = True
+    elif menus.gameRunning and not menus.killedMenuActive and not menus.mainMenuActive:
         background.draw()  # Teken de achtergrond
 
         # Update speleracties
         player.check_if_inside_boundary()  # Controleer of speler binnen de grenzen is
         player.player_looks_at_mouse()  # Laat de speler naar de muis kijken
         player.movement()  # Verwerk spelerbewegingen
-        player.is_being_touched_by_enemy()  # Controleer of de speler wordt geraakt door vijanden
+        player.is_being_touched_by_enemy(enemy)  # Controleer of de speler wordt geraakt door vijanden
 
         # Update vijandacties
         enemy.GenerateEnemy()  # Genereer nieuwe vijanden
@@ -97,6 +98,9 @@ while True:
             needReload_surface = font_small.render('Thou should reload!', False, (255, 0, 0))
             screen.blit(needReload_surface, (player.rot_image_rect.x, player.rot_image_rect.y - 25))
 
+        if player.health <= 0:
+            menus.killedMenuActive = True
+
         # Debug-opties voor vijanden en spelergezondheid
         keys = pygame.key.get_pressed()
         if keys[pygame.K_q] and enemy.enemyList:
@@ -110,9 +114,8 @@ while True:
         clock.tick(60)
 
     # Als de speler dood is, toon het "killed" menu
-    if menus.killedMenuActive and player.health <= 0:
-        menus.gameRunning = False
-        menus.killedMenu()
+    if menus.killedMenuActive:
+        menus.killedMenu(bullet)
 
     # Dubbel flip om visuele bugs te voorkomen
     pygame.display.flip()

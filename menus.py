@@ -1,4 +1,4 @@
-import pygame, logging, json
+import pygame, logging, json, sys
 from pygame.locals import *
 
 # Initializing
@@ -12,13 +12,18 @@ clock = pygame.time.Clock()
 
 # Maak class voor menus
 class Menus(object):
-    def __init__(self, screen):
+    def __init__(self, screen, player, bullet, enemy):
         self.gameRunning = False
         self.mainMenuActive = True
-        self.killedMenuActive = True
+        self.killedMenuActive = False
         self.screen = screen
         self.bgTxtClr = (0,0,0)
+        self.bgTxtClr2 = (0,0,0)
+        self.kilQtBgClr = (0,0,0)
         self.highscore = 0
+        self.player = player
+        self.bullet = bullet
+        self.enemy = enemy
 
     def play_sound(self, sound_path):
         """Speel een geluid af als het pad geldig is."""
@@ -31,9 +36,9 @@ class Menus(object):
     def reset_game_state(self, enemy, player, bullet):
         """Reset de game status naar de beginwaarden."""
         enemy.enemyList.clear()
+        player.health = 100
         player.rectImage.x = infoObject.current_w / 2
         player.rectImage.y = infoObject.current_h / 2
-        player.health = 100
         bullet.score = 0
         bullet.clip_size = 30
         logging.info("Game state has been reset.")
@@ -70,6 +75,10 @@ class Menus(object):
         mainMenu_Text2Rect = mainMenu_Text2.get_rect(center=(infoObject.current_w / 2, infoObject.current_h / 2 + 50))
         self.screen.blit(mainMenu_Text2, mainMenu_Text2Rect)
 
+        mainMenu_Text4 = font.render("Quit gaming!", False, (255, 255, 255), self.bgTxtClr2)
+        mainMenu_Text4Rect = mainMenu_Text4.get_rect(center=(infoObject.current_w / 2, infoObject.current_h / 2 + 100))
+        self.screen.blit(mainMenu_Text4, mainMenu_Text4Rect)
+
         mainMenu_Text3 = font.render(f'Current highscore: {self.highscore}', False, (255, 255, 255))
         mainMenu_Text3Rect = mainMenu_Text3.get_rect(center=(infoObject.current_w / 2, infoObject.current_h / 2 - 50))
         self.screen.blit(mainMenu_Text3, mainMenu_Text3Rect)
@@ -80,12 +89,22 @@ class Menus(object):
                 logging.info("Starting the game!")
                 self.play_sound("graphics/clickSound.mp3")
                 self.play_sound("graphics/startGame.mp3")
-                self.gameRunning = True
                 self.mainMenuActive = False
+                self.gameRunning = True
         else:
             self.bgTxtClr = (0, 0, 0)
 
-    def killedMenu(self):
+        if mainMenu_Text4Rect.collidepoint(pygame.mouse.get_pos()):
+            self.bgTxtClr2 = (120, 120, 120)
+            if pygame.mouse.get_pressed()[0]:  # Left click
+                logging.info("Closing")
+                pygame.quit()
+                sys.exit()
+        else:
+            self.bgTxtClr2 = (0, 0, 0)
+
+    def killedMenu(self, bullet):
+
         """Weergeef het 'killed' menu en reageer op de muisinteractie voor herstart."""
         killedMenuBG_ogImg = pygame.image.load("graphics/killedMenuBG.png").convert()
         killedMenuBG_image = pygame.transform.scale(killedMenuBG_ogImg, (infoObject.current_w, infoObject.current_h))
@@ -93,7 +112,6 @@ class Menus(object):
 
         font = pygame.font.Font("graphics/AurulentSansMNerdFontPropo-Regular.otf", 30)
 
-        from main import bullet
         killedMenuText1 = font.render(f'You got killed :( Your score was: {bullet.score}', False, (255, 255, 255))
         killedMenu_Text1Rect = killedMenuText1.get_rect(center=(infoObject.current_w / 2, infoObject.current_h / 2))
         self.screen.blit(killedMenuText1, killedMenu_Text1Rect)
@@ -102,6 +120,9 @@ class Menus(object):
         killedMenu_Text2Rect = killedMenu_Text2.get_rect(center=(infoObject.current_w / 2, infoObject.current_h / 2 + 50))
         self.screen.blit(killedMenu_Text2, killedMenu_Text2Rect)
 
+        killedMenu_Text4 = font.render("Quit gaming!", False, (255, 255, 255), self.kilQtBgClr)
+        killedMenu_Text4Rect = killedMenu_Text4.get_rect(center=(infoObject.current_w / 2, infoObject.current_h / 2 + 100))
+        self.screen.blit(killedMenu_Text4, killedMenu_Text4Rect)
         highScore_Text3 = font.render(f'A NEW HIGHSCORE!!! YOUR HIGHSCORE: {bullet.score}', False, (255,255,255))
         highScore_Text3Rect =  highScore_Text3.get_rect(center=(infoObject.current_w / 2, infoObject.current_h / 2 - 50))
 
@@ -123,7 +144,6 @@ class Menus(object):
             data = {"max_score": 0}
 
         if data['max_score'] <= bullet.score:
-            print("Highscore!!")
             self.highscore = bullet.score
             self.screen.blit(highScore_Text3, highScore_Text3Rect)
             data['max_score'] = bullet.score
@@ -139,9 +159,18 @@ class Menus(object):
                 logging.info("Restarting the game!")
                 self.play_sound("graphics/clickSound.mp3")
                 self.play_sound("graphics/gameOver.mp3")
-                from main import enemy,player,bullet
-                self.reset_game_state(enemy, player, bullet)
+                self.reset_game_state(self.enemy, self.player, self.bullet)
                 self.killedMenuActive = False
                 self.gameRunning = True
         else:
             self.bgTxtClr = (0, 0, 0)
+
+        if killedMenu_Text4Rect.collidepoint(pygame.mouse.get_pos()):
+            self.kilQtBgClr = (120, 120, 120)
+            logging.info("Colliding with killedMenu_Text4Rect and mouse!")
+            if pygame.mouse.get_pressed()[0]:  # Left click
+                logging.info("Closing")
+                pygame.quit()
+                sys.exit()
+        else:
+            self.kilQtBgClr = (0, 0, 0)

@@ -78,9 +78,9 @@ class Player(object):
         self.rot_image_rect = rot_image.get_rect(center=self.rectImage.center)
         screen.blit(rot_image, self.rot_image_rect.topleft)
 
-    def is_being_touched_by_enemy(self):
+    def is_being_touched_by_enemy(self, enemy):
         """Check if player is being touched by an enemy and update health."""
-        from main import enemy
+
         for enemy in enemy.enemyList:
             if enemy['rect'].colliderect(self.rot_image_rect) and self.health > 0 and self.canTakeHit:
                 self.lastHitTime = pygame.time.get_ticks()
