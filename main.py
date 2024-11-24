@@ -101,14 +101,6 @@ while True:
         if player.health <= 0:
             menus.killedMenuActive = True
 
-        # Debug-opties voor vijanden en spelergezondheid
-        keys = pygame.key.get_pressed()
-        if keys[pygame.K_q] and enemy.enemyList:
-            enemy.enemyList.pop(0)  # Verwijder de eerste vijand uit de lijst
-            logging.debug(f"EnemyList na het verwijderen van [0]: {enemy.enemyList}")
-        if keys[pygame.K_u] and player.health > 0:
-            player.health -= 25  # Verminder gezondheid van de speler voor testdoeleinden
-
         # Update display en houd de framerate constant
         pygame.display.flip()
         clock.tick(60)
